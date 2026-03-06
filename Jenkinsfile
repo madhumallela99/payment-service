@@ -10,9 +10,9 @@ pipeline {
     AWS_REGION = 'ap-south-1'
     ECR_REPO = 'payment-service'
     IMAGE_TAG = "${BUILD_NUMBER}"
-    ARTIFACT_BUCKET = "ecs-codedeploy-artifacts"
-    }
-
+    ECR_URI = '505342112116.dkr.ecr.ap-south-1.amazonaws.com/payment-service'
+    ARTIFACT_BUCKET = 'ecs-codedeploy-artifacts'
+}
     stages {
 
         stage('Checkout Code') {
@@ -36,14 +36,11 @@ pipeline {
             }
         }
 
-       stage('Login to ECR') {
+      stage('Login to ECR') {
     steps {
         sh '''
-        ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO
-
         aws ecr get-login-password --region $AWS_REGION \
-        | docker login --username AWS \
-        --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+        | docker login --username AWS --password-stdin $ECR_URI
         '''
     }
 }
