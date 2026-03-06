@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    tools {
+  git 'Default'
+  maven 'maven'
+}
 
     environment {
         AWS_ACCOUNT_ID = "505342112116"
