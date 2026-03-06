@@ -1,8 +1,8 @@
-FROM openjdk:17
+FROM amazoncorretto:17
 
 WORKDIR /app
 
-COPY target/payment-service.jar app.jar
+COPY target/*.jar app.jar
 
 EXPOSE 8080
 
