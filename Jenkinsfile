@@ -32,14 +32,14 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                sh '''
-                docker build -t $ECR_REPO:$IMAGE_TAG .
-                docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
-                '''
-            }
-        }
-
+    steps {
+        sh '''
+        docker build -t $ECR_REPO:$IMAGE_TAG .
+        docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+        docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:latest
+        '''
+    }
+}
         stage('Login to ECR') {
             steps {
                 sh '''
@@ -51,12 +51,13 @@ pipeline {
         }
 
         stage('Push Image to ECR') {
-            steps {
-                sh '''
-                docker push $ECR_URI:$IMAGE_TAG
-                '''
-            }
-        }
+    steps {
+        sh '''
+        docker push $ECR_URI:$IMAGE_TAG
+        docker push $ECR_URI:latest
+        '''
+    }
+}
 
         stage('Deploy to ECS (Rolling Update)') {
             steps {
