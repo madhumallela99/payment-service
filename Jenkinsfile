@@ -10,7 +10,7 @@ pipeline {
         AWS_REGION = "ap-south-1"
         ECR_REPO = "payment-service"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
+        ECR_URI = "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
         ARTIFACT_BUCKET = "ecs-codedeploy-artifacts"
     }
 
