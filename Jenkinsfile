@@ -1,18 +1,22 @@
 pipeline {
     agent any
-    tools {
-  git 'Default'
-  maven 'maven'
-}
 
     environment {
-    AWS_ACCOUNT_ID = '505342112116'
-    AWS_REGION = 'ap-south-1'
-    ECR_REPO = 'payment-service'
-    IMAGE_TAG = "${BUILD_NUMBER}"
-    ECR_URI = '505342112116.dkr.ecr.ap-south-1.amazonaws.com/payment-service'
-    ARTIFACT_BUCKET = 'ecs-codedeploy-artifacts'
-}
+        AWS_ACCOUNT_ID = '505342112116'
+        AWS_REGION = 'ap-south-1'
+        ECR_REPO = 'payment-service'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+
+        CLUSTER_NAME = 'payment-cluster'
+        SERVICE_NAME = 'payment-service'
+
+        ECR_URI = '505342112116.dkr.ecr.ap-south-1.amazonaws.com/payment-service'
+    }
+
+    tools {
+        maven 'maven'
+    }
+
     stages {
 
         stage('Checkout Code') {
@@ -29,45 +33,51 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh """
+                sh '''
                 docker build -t $ECR_REPO:$IMAGE_TAG .
                 docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
-                """
+                '''
             }
         }
 
-      stage('Login to ECR') {
-    steps {
-        sh '''
-        aws ecr get-login-password --region $AWS_REGION \
-        | docker login --username AWS --password-stdin $ECR_URI
-        '''
-    }
-}
+        stage('Login to ECR') {
+            steps {
+                sh '''
+                aws ecr get-login-password --region $AWS_REGION \
+                | docker login --username AWS \
+                --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
+            }
+        }
 
         stage('Push Image to ECR') {
             steps {
-                sh """
+                sh '''
                 docker push $ECR_URI:$IMAGE_TAG
-                """
+                '''
             }
         }
 
-        stage('Update Task Definition') {
+        stage('Deploy to ECS (Rolling Update)') {
             steps {
-                sh """
-                sed -i 's|IMAGE_URI|$ECR_URI:$IMAGE_TAG|g' taskdef.json
-                """
+                sh '''
+                aws ecs update-service \
+                --cluster $CLUSTER_NAME \
+                --service $SERVICE_NAME \
+                --force-new-deployment \
+                --region $AWS_REGION
+                '''
             }
         }
 
-        stage('Upload Artifact to S3') {
-            steps {
-                sh """
-                zip deployment.zip appspec.yaml taskdef.json
-                aws s3 cp deployment.zip s3://$ARTIFACT_BUCKET/deployment.zip
-                """
-            }
+    }
+
+    post {
+        success {
+            echo "Deployment Successful 🚀"
+        }
+        failure {
+            echo "Deployment Failed ❌"
         }
     }
 }
