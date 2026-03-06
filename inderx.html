@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Payment Service</title>
+
+<style>
+
+body{
+font-family: Arial;
+margin:40px;
+}
+
+input{
+padding:10px;
+margin:5px;
+width:200px;
+}
+
+button{
+padding:10px 15px;
+margin-top:10px;
+}
+
+table{
+margin-top:20px;
+border-collapse: collapse;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Send Money</h2>
+
+<input id="sender" placeholder="Sender"><br>
+<input id="receiver" placeholder="Receiver"><br>
+<input id="amount" placeholder="Amount"><br>
+
+<button onclick="sendMoney()">Send</button>
+
+<h2>Transactions</h2>
+
+<button onclick="loadTransactions()">Load Transactions</button>
+
+<table id="txTable">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Sender</th>
+<th>Receiver</th>
+<th>Amount</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<script>
+
+const API="http://3.111.188.242:8081/payment";
+
+function sendMoney(){
+
+const data={
+sender:document.getElementById("sender").value,
+receiver:document.getElementById("receiver").value,
+amount:parseFloat(document.getElementById("amount").value)
+};
+
+fetch(API+"/send",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+})
+.then(res=>res.json())
+.then(data=>{
+alert("Transaction Successful");
+loadTransactions();
+})
+.catch(err=>{
+console.log(err);
+alert("Error sending money");
+});
+
+}
+
+function loadTransactions(){
+
+fetch(API+"/all")
+.then(res=>res.json())
+.then(data=>{
+
+const tbody=document.querySelector("#txTable tbody");
+tbody.innerHTML="";
+
+data.forEach(tx=>{
+
+const row=`
+<tr>
+<td>${tx.id}</td>
+<td>${tx.sender}</td>
+<td>${tx.receiver}</td>
+<td>${tx.amount}</td>
+</tr>
+`;
+
+tbody.innerHTML+=row;
+
+});
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>
