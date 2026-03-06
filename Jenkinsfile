@@ -7,8 +7,8 @@ pipeline {
         ECR_REPO = 'payment-service'
         IMAGE_TAG = "${BUILD_NUMBER}"
 
-        CLUSTER_NAME = 'payment-cluster'
-        SERVICE_NAME = 'payment-service'
+        CLUSTER_NAME = 'payment-service'
+        SERVICE_NAME = 'payment-springboot-service'
 
         ECR_URI = '505342112116.dkr.ecr.ap-south-1.amazonaws.com/payment-service'
     }
